@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ge-metrics-tokengen
+  namespace: gem
+spec:
+  template:
+    spec:
+      containers:
+        - name: ge-metrics-tokengen
+          image: grafana/metrics-enterprise:v1.2.0
+          args:
+            - --config.file=/etc/ge-metrics/config.yaml
+            - --target=tokengen
+          volumeMounts:
+            - mountPath: /etc/ge-metrics
+              name: ge-metrics-config
+            - mountPath: /etc/ge-metrics/license
+              name: ge-metrics-license
+      volumes:
+        - name: ge-metrics-config
+          configMap:
+            name: ge-metrics-config
+        - name: ge-metrics-license
+          secret:
+            secretName: ge-metrics-license
+      restartPolicy: Never

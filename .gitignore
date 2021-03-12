@@ -1,1 +1,5 @@
 .idea
+*/license.jwt
+*/secret
+prometheus/config-secret.yaml
+gcr.yaml

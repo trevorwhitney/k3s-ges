@@ -1,0 +1,53 @@
+auth:
+  type: enterprise
+
+target: all
+
+cluster_name: jacob-lisi-local-dev
+
+license:
+  path: /etc/ge-metrics/license/license.jwt
+
+admin_client:
+  storage:
+    type: s3
+    s3:
+      endpoint: minio:9000
+      bucket_name: grafana-metrics-admin
+      access_key_id: minio
+      secret_access_key: minio123
+      insecure: true
+
+distributor:
+  shard_by_all_labels: true
+  pool:
+    health_check_ingesters: true
+
+memberlist:
+  abort_if_cluster_join_fails: false
+  bind_port: 7946
+  join_members:
+    - ge-metrics-discovery
+
+ingester:
+  lifecycler:
+    num_tokens: 512
+    ring:
+      kvstore:
+        store: memberlist
+      replication_factor: 3
+
+blocks_storage:
+  tsdb:
+    dir: /tmp/cortex/tsdb
+  bucket_store:
+    sync_dir: /tmp/cortex/tsdb-sync
+  backend: s3
+  s3:
+    endpoint: minio:9000
+    bucket_name: grafana-metrics-tsdb
+    access_key_id: minio
+    secret_access_key: minio123
+    insecure: true
+storage:
+  engine: blocks
