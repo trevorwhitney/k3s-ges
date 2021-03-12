@@ -32,7 +32,7 @@ spec:
         - image: grafana/grafana-enterprise:latest
           env:
             - name: GF_INSTALL_PLUGINS
-              value: "grafana-metrics-enterprise-app-1-3f782984"
+              value: "grafana-metrics-enterprise-app-1-3f782984,grafana-enterprise-logs-app-1-92e94e29"
             - name: GF_AUTH_ANONYMOUS_ENABLED
               value: "true"
             - name: GF_AUTH_ANONYMOUS_ORG_ROLE

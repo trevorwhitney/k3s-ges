@@ -3,3 +3,4 @@
 */secret
 prometheus/config-secret.yaml
 gcr.yaml
+gel/promtail_secret
