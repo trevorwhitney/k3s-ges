@@ -39,24 +39,26 @@ memberlist:
   join_members:
     - ge-logs-discovery
 
+storage_config:
+  aws:
+    s3: http://minio:minio123@minio.gem.svc.cluster.local:9000
+    bucketnames: grafana-logs-data
+    s3forcepathstyle: true
+  boltdb_shipper:
+    active_index_directory: /data/boltdb-shipper-active
+    cache_location: /data/boltdb-shipper-cache
+    cache_ttl: 24h # Can be increased for faster performance over longer query periods, uses more disk space
+    shared_store: s3
+
 schema_config:
   configs:
     - from: 2021-01-01
       store: boltdb-shipper
-      object_store: filesystem
+      object_store: aws
       schema: v11
       index:
         prefix: index_
         period: 24h
-
-storage_config:
-  boltdb_shipper:
-    active_index_directory: /data/boltdb-shipper-active
-    cache_location: /data/boltdb-shipper-cache
-    cache_ttl: 24h         # Can be increased for faster performance over longer query periods, uses more disk space
-    shared_store: filesystem
-  filesystem:
-    directory: /data/chunks
 
 table_manager:
   retention_deletes_enabled: false
@@ -64,4 +66,4 @@ table_manager:
 
 compactor:
   working_directory: /data/boltdb-shipper-compactor
-  shared_store: filesystem
+  shared_store: s3

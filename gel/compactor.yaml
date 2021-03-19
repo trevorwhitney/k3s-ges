@@ -1,27 +1,39 @@
-apiVersion: apps/v1
-kind: StatefulSet
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
-  labels:
-    name: ge-logs
-  name: ge-logs
+  name: compactor-data
   namespace: gem
 spec:
-  replicas: 3
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: compactor
+  name: compactor
+  namespace: gem
+spec:
   selector:
     matchLabels:
-      name: ge-logs
-  serviceName: ge-logs
+      app: compactor
   template:
     metadata:
       labels:
-        name: ge-logs
+        app: compactor
     spec:
       containers:
         - args:
             - -config.file=/etc/ge-logs/config.yaml
           image: us.gcr.io/kubernetes-dev/enterprise-logs:v1.0.0
           imagePullPolicy: IfNotPresent
-          name: enterprise-logs
+          name: compactor
           ports:
             - containerPort: 80
               name: http
@@ -54,14 +66,6 @@ spec:
         - name: ge-logs-license
           secret:
             secretName: ge-logs-license
-  updateStrategy:
-    type: RollingUpdate
-  volumeClaimTemplates:
-    - metadata:
-        name: data
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 50Gi
+        - name: data
+          persistentVolumeClaim:
+            claimName: compactor-data

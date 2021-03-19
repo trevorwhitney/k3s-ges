@@ -35,10 +35,6 @@ spec:
               port: 80
             initialDelaySeconds: 15
             timeoutSeconds: 1
-          resources:
-            requests:
-              cpu: "2"
-              memory: 4Gi
           volumeMounts:
             - mountPath: /data
               name: data
