@@ -1,6 +1,8 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
+  annotations:
+    prometheus.io/scrape: 'true'
   labels:
     name: ge-metrics
   name: ge-metrics
