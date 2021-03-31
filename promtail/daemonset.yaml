@@ -61,7 +61,7 @@ spec:
         - name: config
           secret:
             defaultMode: 420
-            secretName: promtail-config k
+            secretName: promtail-config
         - hostPath:
             path: /run/promtail
             type: ""
