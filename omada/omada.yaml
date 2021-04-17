@@ -1,0 +1,165 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: omada
+  namespace: omada
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: omada
+  name: omada
+  namespace: omada
+spec:
+  selector:
+    matchLabels:
+      app: omada
+  template:
+    metadata:
+      labels:
+        app: omada
+    spec:
+      containers:
+        - image: mbentley/omada-controller:latest
+          env:
+            - name: MANAGE_HTTP_PORT
+              value: "8088"
+            - name: MANAGE_HTTPS_PORT
+              value: "8043"
+            - name: PORTAL_HTTP_PORT
+              value: "8088"
+            - name: PORTAL_HTTPS_PORT
+              value: "8843"
+            - name: SHOW_SERVER_LOGS
+              value: "true"
+            - name: SHOW_MONGODB_LOGS
+              value: "false"
+            - name: SSL_CERT_NAME
+              value: "tls.crt"
+            - name: SSL_KEY_NAME
+              value: "tls.key"
+            - name: TZ
+              value: "America/Denver"
+          imagePullPolicy: IfNotPresent
+          name: grafana
+          ports:
+            - containerPort: 8088
+              name: manage-http
+              protocol: TCP
+            - containerPort: 8043
+              name: manage-https
+              protocol: TCP
+            - containerPort: 8843
+              name: portal-https
+              protocol: TCP
+            - containerPort: 29810
+              protocol: TCP
+            - containerPort: 29810
+              protocol: UDP
+            - containerPort: 29811
+              protocol: TCP
+            - containerPort: 29811
+              protocol: UDP
+            - containerPort: 29812
+              protocol: TCP
+            - containerPort: 29812
+              protocol: UDP
+            - containerPort: 29813
+              protocol: TCP
+            - containerPort: 29813
+              protocol: UDP
+          # readinessProbe:
+          #   failureThreshold: 3
+          #   httpGet:
+          #     path: /robots.txt
+          #     port: 3000
+          #     scheme: HTTP
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 30
+          #   successThreshold: 1
+          #   timeoutSeconds: 2
+          resources:
+            limits:
+              memory: 4Gi
+            requests:
+              cpu: 100m
+              memory: 2Gi
+          volumeMounts:
+            - mountPath: /opt/tplink/EAPController/data
+              name: omada
+              subPath: data
+            - mountPath: /opt/tplink/EAPController/work
+              name: omada
+              subPath: work
+            - mountPath: /opt/tplink/EAPController/logs
+              name: omada
+              subPath: logs
+      volumes:
+        - name: omada
+          persistentVolumeClaim:
+            claimName: omada
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: omada
+  namespace: omada
+spec:
+  ports:
+    - port: 7080
+      name: "management-http"
+      targetPort: manage-http
+      protocol: TCP
+    - port: 7043
+      targetPort: manage-https
+      name: "management-https"
+      protocol: TCP
+    - port: 7843
+      name: "portal-https"
+      targetPort: portal-https
+      protocol: TCP
+    - port: 29810
+      name: "29810-tcp"
+      targetPort: 29810
+      protocol: TCP
+    - port: 29810
+      name: "29810-udp"
+      targetPort: 29810
+      protocol: UDP
+    - port: 29811
+      name: "29811-tcp"
+      targetPort: 29811
+      protocol: TCP
+    - port: 29811
+      name: "29811-udp"
+      targetPort: 29811
+      protocol: UDP
+    - port: 29812
+      name: "29812-tcp"
+      targetPort: 29812
+      protocol: TCP
+    - port: 29812
+      name: "29812-udp"
+      targetPort: 29812
+      protocol: UDP
+    - port: 29813
+      name: "29813-tcp"
+      targetPort: 29813
+      protocol: TCP
+    - port: 29813
+      name: "29813-udp"
+      targetPort: 29813
+      protocol: UDP
+  selector:
+    app: omada
+  sessionAffinity: None
+  type: NodePort
